@@ -3,12 +3,31 @@ import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import { getToken } from "@/lib/auth";
 import bcrypt from "bcryptjs";
+import { changePasswordLimiter, getClientIP, applyRateLimit } from "@/lib/rateLimit";
 
 export async function POST(req) {
   try {
     const user = await getToken(req);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Apply rate limiting
+    const clientIP = getClientIP(req);
+    const rateLimitResult = await applyRateLimit(changePasswordLimiter, `change-password:${clientIP}:${user.id}`);
+
+    if (rateLimitResult.isRateLimited) {
+      return NextResponse.json(
+        { error: "Too many password change attempts. Please try again later." },
+        { 
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+            'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+          }
+        }
+      );
     }
 
     const body = await req.json();

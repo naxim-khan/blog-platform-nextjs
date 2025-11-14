@@ -4,11 +4,30 @@ import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import { loginSchema } from "@/lib/validators/auth";
 import { createToken } from "@/lib/jwt";
+import { loginLimiter, getClientIP, applyRateLimit } from "@/lib/rateLimit";
 
 export async function POST(req) {
     try {
         const body = await req.json();
         const { email, password } = loginSchema.parse(body);
+
+        // Apply rate limiting
+        const clientIP = getClientIP(req);
+        const rateLimitResult = await applyRateLimit(loginLimiter, `login:${clientIP}:${email}`);
+
+        if (rateLimitResult.isRateLimited) {
+            return NextResponse.json(
+                { error: "Too many login attempts. Please try again later." },
+                { 
+                  status: 429,
+                  headers: {
+                    'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+                    'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+                    'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+                  }
+                }
+            );
+        }
 
         await connectDB();
 

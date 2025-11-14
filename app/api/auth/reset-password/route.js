@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import { z } from "zod";
+import { resetPasswordLimiter, getClientIP, applyRateLimit } from "@/lib/rateLimit";
 
 const resetPasswordSchema = z.object({
   token: z.string().min(1, "Reset token is required"),
@@ -17,6 +18,24 @@ export async function POST(request) {
     
     // Validate input
     const { token, password } = resetPasswordSchema.parse(body);
+
+    // Apply rate limiting
+    const clientIP = getClientIP(request);
+    const rateLimitResult = await applyRateLimit(resetPasswordLimiter, `reset-password:${clientIP}:${token}`);
+
+    if (rateLimitResult.isRateLimited) {
+      return NextResponse.json(
+        { error: "Too many reset attempts. Please try again later." },
+        { 
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+            'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+          }
+        }
+      );
+    }
 
     await connectDB();
 

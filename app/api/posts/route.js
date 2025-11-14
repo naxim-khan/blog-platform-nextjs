@@ -4,9 +4,28 @@ import Post from "@/models/Post";
 import { postSchema } from "@/lib/validators/post";
 import { getToken } from "@/lib/auth";
 import { slugify } from '@/lib/utils/slugify';
+import { generalLimiter, postCreationLimiter, getClientIP, applyRateLimit } from "@/lib/rateLimit";
 
 export async function GET(req) {
     try {
+        // Apply rate limiting for GET posts
+        const clientIP = getClientIP(req);
+        const rateLimitResult = await applyRateLimit(generalLimiter, `get-posts:${clientIP}`);
+
+        if (rateLimitResult.isRateLimited) {
+            return NextResponse.json(
+                { error: "Too many requests. Please try again later." },
+                { 
+                  status: 429,
+                  headers: {
+                    'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+                    'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+                    'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+                  }
+                }
+            );
+        }
+
         await connectDB();
 
         const { searchParams } = new URL(req.url);
@@ -43,6 +62,24 @@ export async function POST(req) {
         const user = await getToken(req);
         if (!user) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        // Apply rate limiting for POST posts
+        const clientIP = getClientIP(req);
+        const rateLimitResult = await applyRateLimit(postCreationLimiter, `create-post:${clientIP}:${user.id}`);
+
+        if (rateLimitResult.isRateLimited) {
+            return NextResponse.json(
+                { error: "Too many post creation attempts. Please slow down." },
+                { 
+                  status: 429,
+                  headers: {
+                    'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+                    'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+                    'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+                  }
+                }
+            );
         }
 
         const body = await req.json();

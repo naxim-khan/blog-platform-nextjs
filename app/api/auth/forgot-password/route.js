@@ -1,10 +1,10 @@
-// app/api/auth/forgot-password/route.js
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { connectDB } from '@/lib/db'; // Same import as login
-import User from '@/models/User'; // Use Mongoose User model
+import { connectDB } from '@/lib/db';
+import User from '@/models/User';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
+import { forgotPasswordLimiter, getClientIP, applyRateLimit } from '@/lib/rateLimit';
 
 const emailSchema = z.object({
   email: z.string().email('Please enter a valid email address')
@@ -18,7 +18,28 @@ export async function POST(request) {
     const validatedData = emailSchema.parse(body);
     const { email } = validatedData;
 
-    // Connect to database - use the same pattern as login
+    // Apply rate limiting
+    const clientIP = getClientIP(request);
+    const rateLimitResult = await applyRateLimit(forgotPasswordLimiter, `forgot-password:${clientIP}:${email}`);
+
+    if (rateLimitResult.isRateLimited) {
+      return NextResponse.json(
+        { 
+          error: "Too many password reset attempts. Please try again later.",
+          retryAfter: Math.ceil((rateLimitResult.reset - Date.now()) / 1000)
+        },
+        { 
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+            'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+          }
+        }
+      );
+    }
+
+    // Connect to database
     await connectDB();
 
     // Check if user exists using Mongoose User model

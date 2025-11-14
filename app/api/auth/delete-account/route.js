@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import Post from "@/models/Post";
 import { safeVerifyToken } from "@/lib/jwt";
+import { deleteAccountLimiter, getClientIP, applyRateLimit } from "@/lib/rateLimit";
 
 export async function DELETE(request) {
     try {
@@ -23,6 +24,24 @@ export async function DELETE(request) {
             return NextResponse.json(
                 { error: "Invalid or expired token" },
                 { status: 401 }
+            );
+        }
+
+        // Apply rate limiting for delete account
+        const clientIP = getClientIP(request);
+        const rateLimitResult = await applyRateLimit(deleteAccountLimiter, `delete-account:${clientIP}:${decoded.id}`);
+
+        if (rateLimitResult.isRateLimited) {
+            return NextResponse.json(
+                { error: "Too many delete attempts. Please try again later." },
+                { 
+                  status: 429,
+                  headers: {
+                    'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+                    'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+                    'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+                  }
+                }
             );
         }
 

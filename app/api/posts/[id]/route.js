@@ -3,10 +3,29 @@ import { connectDB } from "@/lib/db";
 import Post from "@/models/Post";
 import { postSchema } from "@/lib/validators/post";
 import { getToken } from "@/lib/auth";
+import { generalLimiter, getClientIP, applyRateLimit } from "@/lib/rateLimit";
 
 // GET single post
 export async function GET(req, { params }) {
   try {
+    // Apply rate limiting for GET single post
+    const clientIP = getClientIP(req);
+    const rateLimitResult = await applyRateLimit(generalLimiter, `get-post:${clientIP}`);
+
+    if (rateLimitResult.isRateLimited) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { 
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+            'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+          }
+        }
+      );
+    }
+
     await connectDB();
     
     // Await the params promise
@@ -30,6 +49,24 @@ export async function PUT(req, { params }) {
     const user = await getToken(req);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Apply rate limiting for UPDATE post
+    const clientIP = getClientIP(req);
+    const rateLimitResult = await applyRateLimit(generalLimiter, `update-post:${clientIP}:${user.id}`);
+
+    if (rateLimitResult.isRateLimited) {
+      return NextResponse.json(
+        { error: "Too many update attempts. Please try again later." },
+        { 
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+            'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+          }
+        }
+      );
     }
 
     // Await the params promise
@@ -73,6 +110,24 @@ export async function DELETE(req, { params }) {
     const user = await getToken(req);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Apply rate limiting for DELETE post
+    const clientIP = getClientIP(req);
+    const rateLimitResult = await applyRateLimit(generalLimiter, `delete-post:${clientIP}:${user.id}`);
+
+    if (rateLimitResult.isRateLimited) {
+      return NextResponse.json(
+        { error: "Too many delete attempts. Please try again later." },
+        { 
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+            'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+          }
+        }
+      );
     }
 
     // Await the params promise
