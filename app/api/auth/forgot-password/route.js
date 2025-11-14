@@ -53,7 +53,7 @@ export async function POST(request) {
     });
 
     // Create reset URL
-    const resetUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/auth/reset-password?token=${resetToken}`;
+    const resetUrl = `${process.env.NEXTAUTH_URL || 'https://blog-platform-nextjs-orpin.vercel.app/'}/auth/reset-password?token=${resetToken}`;
 
     // Send email
     await transporter.sendMail({
