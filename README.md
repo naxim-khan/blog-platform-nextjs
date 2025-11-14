@@ -190,8 +190,7 @@ npm run dev
 # **Screenshots**
 
 
-![Home Page]
-<img src="./screenshots/home.png" alt="Home Page" width="100%" />
+![Home Page](./screenshots/home.png)
 ![Blog Page](./screenshots/blog.png)
 ![Dashboard](./screenshots/dashboard.png)
 ![Create Post](./screenshots/create.png)
