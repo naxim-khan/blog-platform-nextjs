@@ -1,0 +1,102 @@
+/* app/blog/[slug]/newspaper-styles.css */
+.newspaper-layout .newspaper-content p {
+  margin-bottom: 1.5rem;
+  text-align: justify;
+  line-height: 1.8;
+}
+
+.newspaper-layout .newspaper-content h1,
+.newspaper-layout .newspaper-content h2,
+.newspaper-layout .newspaper-content h3 {
+  font-family: Georgia, serif;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
+
+
+.newspaper-layout .newspaper-content h1 {
+  font-size: 2rem;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0.5rem;
+}
+
+.newspaper-layout .newspaper-content h2 {
+  font-size: 1.5rem;
+}
+
+.newspaper-layout .newspaper-content h3 {
+  font-size: 1.25rem;
+}
+
+.newspaper-layout .newspaper-content blockquote {
+  border-left: 4px solid #cbd5e1;
+  padding-left: 1.5rem;
+  margin: 2rem 0;
+  font-style: italic;
+  background: #f8fafc;
+  padding: 1.5rem;
+}
+
+.newspaper-layout .newspaper-content ul,
+.newspaper-layout .newspaper-content ol {
+  margin: 1.5rem 0;
+  padding-left: 2rem;
+}
+
+.newspaper-layout .newspaper-content li {
+  margin-bottom: 0.5rem;
+}
+
+.newspaper-layout .newspaper-content img {
+  margin: 2rem 0;
+  border-radius: 0;
+}
+
+.newspaper-layout .newspaper-content .prose {
+  max-width: none;
+}
+
+.newspaper-layout .newspaper-typography p:first-of-type::first-letter {
+  float: left;
+  font-size: 4rem;
+  line-height: 0.8;
+  margin-right: 0.5rem;
+  margin-top: 0.2rem;
+  font-weight: bold;
+  color: #1e293b;
+  font-family: Georgia, serif;
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+  .newspaper-layout .newspaper-content h1,
+  .newspaper-layout .newspaper-content h2,
+  .newspaper-layout .newspaper-content h3 {
+    color: #4b4b4b;
+  }
+
+  .newspaper-layout .newspaper-content blockquote {
+    background: #1e293b;
+    border-left-color: #475569;
+  }
+
+  .newspaper-layout .newspaper-typography p:first-of-type::first-letter {
+    color: #f1f5f9;
+  }
+}
+
+.dark .newspaper-layout .newspaper-content h1,
+.dark .newspaper-layout .newspaper-content h2,
+.dark .newspaper-layout .newspaper-content h3 {
+  color: #f1f5f9;
+}
+
+.dark .newspaper-layout .newspaper-content blockquote {
+  background: #1e293b;
+  border-left-color: #475569;
+}
+
+.dark .newspaper-layout .newspaper-typography p:first-of-type::first-letter {
+  color: #f1f5f9;
+}
