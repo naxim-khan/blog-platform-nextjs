@@ -1,27 +1,27 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogDescription,
   DialogFooter,
   DialogClose
@@ -89,12 +89,19 @@ export default function BlogTable({ posts, onUpdate }) {
                 <TableRow key={post._id} className="hover:bg-gray-50/50">
                   <TableCell className="font-medium">
                     <div>
-                      <p className="font-semibold text-gray-900 line-clamp-1">
-                        {post.title}
+                      <p
+                        className="font-semibold text-gray-900 line-clamp-1 hover:cursor-pointer"
+                        title={post.title}
+                      >
+                        {post.title?.slice(0, 20)}...
                       </p>
                       <p className="text-sm text-gray-500 line-clamp-2 mt-1">
-                        {post.excerpt || post.content?.substring(0, 100)}...
+                        {(post.excerpt || post.content)
+                          ?.split(" ")
+                          .slice(0, 7)
+                          .join(" ")}...
                       </p>
+
                     </div>
                   </TableCell>
                   <TableCell>
@@ -119,21 +126,21 @@ export default function BlogTable({ posts, onUpdate }) {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => window.open(`/post/${post._id}`, '_blank')}
                           className="cursor-pointer"
                         >
                           <Eye className="h-4 w-4 mr-2" />
                           View Post
                         </DropdownMenuItem>
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => router.push(`/dashboard/edit/${post._id}`)}
                           className="cursor-pointer"
                         >
                           <Edit className="h-4 w-4 mr-2" />
                           Edit Post
                         </DropdownMenuItem>
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => setDeleteDialog({ open: true, post })}
                           className="cursor-pointer text-red-600 focus:text-red-600"
                         >
@@ -163,8 +170,8 @@ export default function BlogTable({ posts, onUpdate }) {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               onClick={() => handleDelete(deleteDialog.post?._id)}
             >
               Delete Post
