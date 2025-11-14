@@ -1,4 +1,4 @@
-# Inkforge — Modern Blog Creation & Management Platform
+#Modern Blog Creation & Management Platform
 
 A full-stack blogging platform built with **Next.js 16**, **MongoDB**, **JWT Authentication**, **Tailwind CSS**, and **shadcn/ui**. Users can write, edit, publish, and manage blogs through a clean dashboard, while visitors enjoy a fast, modern reading experience.
 
