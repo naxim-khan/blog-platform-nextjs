@@ -93,7 +93,7 @@ export default async function HomePage() {
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-blue-700 leading-tight tracking-tight">
                 Discover Useful{" "}
                 <span className="relative inline-block">
-                  <span className="relative z-10 bg-linear-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
+                  <span className="relative z-10 bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
                     Content Here !
                   </span>
                   <span className="absolute bottom-2 left-0 w-full h-4 bg-amber-400/20 -rotate-1 rounded-lg blur-sm"></span>
@@ -118,12 +118,11 @@ export default async function HomePage() {
           </div>
         </div>
 
-        {/* Draggable Cards - Right Side by Default */}
+        {/* Draggable Cards - Right Side by Default - Hidden on mobile */}
         {draggablePosts.length > 0 && (
-          <DraggableCardContainer className="absolute inset-0 z-20 pointer-events-none">
-
-            {/* Guidance Animation - Grab Hand Icon */}
-            <div className="absolute top-10 right-10 z-30 flex items-center gap-2 bg-black/30 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-sm animate-bounce">
+          <DraggableCardContainer className="absolute inset-0 z-20 pointer-events-none hidden md:block">
+            {/* Guidance Animation - Grab Hand Icon - Also hidden on mobile */}
+            <div className="absolute top-10 right-10 z-30 flex items-center gap-2 bg-black/30 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-sm animate-bounce hidden md:flex">
               <svg
                 className="w-5 h-5"
                 fill="none"
