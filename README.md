@@ -190,11 +190,11 @@ npm run dev
 # **Screenshots**
 
 ```
-![Home Page](screenshots/home.png)
-![Blog Page](screenshots/blog.png)
-![Dashboard](screenshots/dashboard.png)
-![Create Post](screenshots/create.png)
-![Profile](screenshots/profile.png)
+![Home Page](/screenshots/home.png)
+![Blog Page](/screenshots/blog.png)
+![Dashboard](/screenshots/dashboard.png)
+![Create Post](/screenshots/create.png)
+![Profile](/screenshots/profile.png)
 ```
 
 ---
