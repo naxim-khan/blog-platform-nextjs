@@ -17,7 +17,9 @@ import {
     Shield,
     CheckCircle,
     Sparkles,
-    ImageIcon
+    ImageIcon,
+    Trash2,
+    AlertTriangle
 } from "lucide-react";
 import {
     Dialog,
@@ -30,13 +32,16 @@ import {
 } from "@/components/ui/dialog";
 
 export default function ProfilePage() {
-    const { user, updateProfile } = useAuth();
+    const { user, updateProfile, logout } = useAuth();
     const [loading, setLoading] = useState(false);
     const [profileLoading, setProfileLoading] = useState(true);
     const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [deleteConfirmText, setDeleteConfirmText] = useState("");
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     const [formData, setFormData] = useState({
         username: "",
@@ -196,6 +201,46 @@ export default function ProfilePage() {
         }
     };
 
+    const handleDeleteAccount = async () => {
+        if (deleteConfirmText !== "delete my account") {
+            setSaveMessage("Please type 'delete my account' to confirm");
+            return;
+        }
+
+        setDeleteLoading(true);
+
+        try {
+            const res = await fetch('/api/auth/delete-account', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                setSaveMessage("Account deleted successfully!");
+                setDeleteDialogOpen(false);
+                // Redirect to home page or login page after deletion
+                setTimeout(() => {
+                    if (logout) {
+                        logout();
+                    }
+                    window.location.href = '/';
+                }, 2000);
+            } else {
+                setSaveMessage(data.error || "Failed to delete account");
+            }
+        } catch (error) {
+            console.error('Error deleting account:', error);
+            setSaveMessage("Error deleting account");
+        } finally {
+            setDeleteLoading(false);
+            setTimeout(() => setSaveMessage(""), 3000);
+        }
+    };
+
     const handleChange = (field, value) => {
         setFormData(prev => ({
             ...prev,
@@ -273,6 +318,8 @@ export default function ProfilePage() {
                 {saveMessage && (
                     <div className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow-sm ${saveMessage.includes("successfully")
                         ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800"
+                        : saveMessage.includes("deleted")
+                        ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800"
                         : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800"
                         }`}>
                         <CheckCircle className="h-4 w-4" />
@@ -584,6 +631,84 @@ export default function ProfilePage() {
                                             </Button>
                                         </DialogFooter>
                                     </form>
+                                </DialogContent>
+                            </Dialog>
+
+                            {/* Delete Account Button */}
+                            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button 
+                                        variant="outline" 
+                                        className="w-full border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-700 dark:hover:text-red-300 rounded-xl py-2.5"
+                                    >
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        Delete Account
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-md rounded-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+                                    <DialogHeader>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 dark:from-red-600 dark:to-red-700 rounded-xl flex items-center justify-center">
+                                                <AlertTriangle className="h-5 w-5 text-white" />
+                                            </div>
+                                            <div>
+                                                <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">Delete Account</DialogTitle>
+                                                <DialogDescription className="text-slate-600 dark:text-slate-400">
+                                                    This action cannot be undone. All your data will be permanently removed.
+                                                </DialogDescription>
+                                            </div>
+                                        </div>
+                                    </DialogHeader>
+
+                                    <div className="space-y-4">
+                                        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                                            <h4 className="font-semibold text-red-800 dark:text-red-200 mb-2 flex items-center gap-2">
+                                                <AlertTriangle className="h-4 w-4" />
+                                                Warning: This will permanently delete
+                                            </h4>
+                                            <ul className="text-sm text-red-700 dark:text-red-300 space-y-1">
+                                                <li>• Your account and profile information</li>
+                                                <li>• All your posts and content</li>
+                                                <li>• Your comments and interactions</li>
+                                                <li>• Any associated data</li>
+                                            </ul>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <Label htmlFor="deleteConfirm" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                Type <span className="font-mono text-red-600 dark:text-red-400">"delete my account"</span> to confirm
+                                            </Label>
+                                            <Input
+                                                id="deleteConfirm"
+                                                value={deleteConfirmText}
+                                                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                                                placeholder="delete my account"
+                                                className="border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-red-500 dark:focus:border-red-400 focus:ring-red-500 dark:focus:ring-red-400 rounded-xl"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-4">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => {
+                                                setDeleteDialogOpen(false);
+                                                setDeleteConfirmText("");
+                                            }}
+                                            className="w-full sm:w-auto border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                                        >
+                                            Cancel
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            disabled={deleteLoading || deleteConfirmText !== "delete my account"}
+                                            onClick={handleDeleteAccount}
+                                            className="w-full sm:w-auto bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 dark:from-red-600 dark:to-red-700 dark:hover:from-red-700 dark:hover:to-red-800 text-white disabled:opacity-50"
+                                        >
+                                            {deleteLoading ? "Deleting..." : "Delete Account Forever"}
+                                        </Button>
+                                    </DialogFooter>
                                 </DialogContent>
                             </Dialog>
                         </CardContent>
