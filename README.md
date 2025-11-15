@@ -1,4 +1,9 @@
-#Modern Blog Creation & Management Platform
+# 📺 Platform Guide (YouTubeo)
+**Watch complete walkthrough:** https://youtu.be/-Ae12K_KHpw
+
+---
+
+# Modern Blog Creation & Management Platform
 
 A full-stack blogging platform built with **Next.js 16**, **MongoDB**, **JWT Authentication**, **Tailwind CSS**, and **shadcn/ui**. Users can write, edit, publish, and manage blogs through a clean dashboard, while visitors enjoy a fast, modern reading experience.
 
@@ -219,6 +224,6 @@ npm run dev
 
 ## Contact
 
-**Developer:** Nazeem Khan
-**GitHub:** [https://github.com/naxim-khan](https://github.com/naxim-khan)
-**Portfolio:** [https://nazeem-khan-portfolio.vercel.app](https://nazeem-khan-portfolio.vercel.app)
+**Developer:** Nazeem Khan  
+**GitHub:** https://github.com/naxim-khan  
+**Portfolio:** https://nazeem-khan-portfolio.vercel.app
