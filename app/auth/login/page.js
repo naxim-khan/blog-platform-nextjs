@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
-import { Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle, ArrowLeft, Home } from "lucide-react";
 
 // Validation schema
 const loginSchema = z.object({
@@ -161,6 +161,17 @@ export default function LoginPage() {
     return (
         <main className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-4 sm:py-8 px-3 sm:px-4">
             <div className="w-full max-w-sm sm:max-w-md p-4 sm:p-6 lg:p-8 bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl border border-gray-100 mx-2 sm:mx-0">
+                {/* Back to Home Button */}
+                <div className="mb-4 sm:mb-6">
+                    <button
+                        onClick={() => router.push('/')}
+                        className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors group"
+                    >
+                        <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+                        <span>Back to Homepage</span>
+                    </button>
+                </div>
+
                 {/* Header */}
                 <div className="text-center mb-6 sm:mb-8">
                     <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
@@ -289,6 +300,17 @@ export default function LoginPage() {
                             Create account
                         </a>
                     </p>
+                </div>
+
+                {/* Alternative Back to Home Button at Bottom */}
+                <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200 text-center">
+                    <button
+                        onClick={() => router.push('/')}
+                        className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors group"
+                    >
+                        <Home className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                        <span>Return to Homepage</span>
+                    </button>
                 </div>
             </div>
         </main>

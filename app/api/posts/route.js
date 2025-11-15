@@ -1,13 +1,14 @@
+// api/posts/route.js
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Post from "@/models/Post";
-import User from "@/models/User"; // <-- important import
+import User from "@/models/User";
 import { postSchema } from "@/lib/validators/post";
 import { getToken } from "@/lib/auth";
 import { slugify } from '@/lib/utils/slugify';
 import { generalLimiter, postCreationLimiter, getClientIP, applyRateLimit } from "@/lib/rateLimit";
 
-export async function GET(req) {
+export async function GET(req) {  // REMOVE: { params } parameter
   try {
     const clientIP = getClientIP(req);
     const rateLimitResult = await applyRateLimit(generalLimiter, `get-posts:${clientIP}`);
@@ -33,7 +34,7 @@ export async function GET(req) {
     const skip = (page - 1) * limit;
 
     const posts = await Post.find({ published: true })
-      .populate('author', 'username email') // now User is registered
+      .populate('author', 'username email')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -56,6 +57,7 @@ export async function GET(req) {
   }
 }
 
+// POST function remains the same...
 export async function POST(req) {
   try {
     const user = await getToken(req);

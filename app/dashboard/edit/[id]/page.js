@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Save, FileText, Eye, Tag, Image, FolderOpen, Sparkles, Clock, Globe, CheckCircle } from "lucide-react";
+import { ArrowLeft, Save, FileText, Eye, Tag, Image, FolderOpen, Sparkles, Clock, Globe, CheckCircle, AlertCircle, User } from "lucide-react";
 import Link from "next/link";
 import RichTextEditor from "@/components/editor/RichTextEditor";
 
@@ -20,6 +20,7 @@ export default function EditPost() {
 
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [tags, setTags] = useState([]);
     const [tagInput, setTagInput] = useState("");
     const [formData, setFormData] = useState({
@@ -44,12 +45,24 @@ export default function EditPost() {
         "Arts & Culture"
     ];
 
-    // Fetch post data when component mounts
+    // Fetch post data with ownership check
     useEffect(() => {
         const fetchPost = async () => {
             try {
                 setLoading(true);
+                setError(null);
+                
                 const res = await fetch(`/api/posts/${postId}`);
+
+                if (res.status === 403) {
+                    setError("You don't have permission to edit this post");
+                    return;
+                }
+
+                if (res.status === 404) {
+                    setError("Post not found");
+                    return;
+                }
 
                 if (!res.ok) {
                     throw new Error('Failed to fetch post');
@@ -70,7 +83,7 @@ export default function EditPost() {
                 setTags(post.tags || []);
             } catch (error) {
                 console.error('Error fetching post:', error);
-                alert('Failed to load post data');
+                setError('Failed to load post data');
             } finally {
                 setLoading(false);
             }
@@ -102,6 +115,7 @@ export default function EditPost() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSaving(true);
+        setError(null);
 
         try {
             const res = await fetch(`/api/posts/${postId}`, {
@@ -116,6 +130,10 @@ export default function EditPost() {
             const data = await res.json();
 
             if (!res.ok) {
+                if (res.status === 403) {
+                    setError("You don't have permission to update this post");
+                    return;
+                }
                 throw new Error(data.error || 'Failed to update post');
             }
 
@@ -123,7 +141,7 @@ export default function EditPost() {
             router.refresh();
         } catch (err) {
             console.error('Error updating post:', err);
-            alert(err.message);
+            setError(err.message);
         } finally {
             setSaving(false);
         }
@@ -131,6 +149,7 @@ export default function EditPost() {
 
     const isFormValid = formData.title.trim() && formData.content.trim();
 
+    // Loading state
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
@@ -138,6 +157,36 @@ export default function EditPost() {
                     <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mx-auto mb-4"></div>
                     <p className="text-lg font-medium text-gray-700">Loading post data</p>
                     <p className="text-sm text-gray-500 mt-1">Getting everything ready...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Error state - Forbidden or Not Found
+    if (error) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+                <div className="text-center max-w-md mx-4">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <AlertCircle className="h-8 w-8 text-red-600" />
+                    </div>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                        {error.includes("permission") ? "Access Denied" : "Post Not Found"}
+                    </h1>
+                    <p className="text-gray-600 mb-6">
+                        {error}
+                    </p>
+                    <div className="space-y-3">
+                        <Button 
+                            onClick={() => router.push('/dashboard/posts')}
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                            Back to Posts
+                        </Button>
+                        <div className="text-sm text-gray-500">
+                            <p>If you believe this is an error, please contact support.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         );
@@ -190,6 +239,17 @@ export default function EditPost() {
                     </Button>
                 </div>
             </div>
+
+            {/* Error Alert */}
+            {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-red-800">
+                        <AlertCircle className="h-4 w-4" />
+                        <span className="font-medium">Error:</span>
+                        <span>{error}</span>
+                    </div>
+                </div>
+            )}
 
             <form id="post-form" onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 sm:gap-6">
