@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, Eye, Clock, ArrowUpRight } from "lucide-react";
+import { Calendar, Eye, Clock, ArrowUpRight, BookOpen, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function PostCard({ post, className, priority = false }) {
@@ -25,9 +25,9 @@ export function PostCard({ post, className, priority = false }) {
       _id: post?._id?.toString?.() ?? post?._id ?? "",
       author: post?.author
         ? {
-            ...post.author,
-            _id: post.author._id?.toString?.() ?? post.author._id ?? "",
-          }
+          ...post.author,
+          _id: post.author._id?.toString?.() ?? post.author._id ?? "",
+        }
         : null,
     })
   );
@@ -86,6 +86,52 @@ export function PostCard({ post, className, priority = false }) {
     router.push(`/user/${authorId}`);
   };
 
+  // --- Get gradient based on category ---
+  const getCategoryGradient = (category) => {
+    const gradients = {
+      Technology: "from-blue-500/20 via-purple-500/20 to-cyan-500/20",
+      Lifestyle: "from-green-500/20 via-emerald-500/20 to-teal-500/20",
+      Education: "from-amber-500/20 via-orange-500/20 to-red-500/20",
+      Business: "from-indigo-500/20 via-purple-500/20 to-pink-500/20",
+      Health: "from-rose-500/20 via-pink-500/20 to-fuchsia-500/20",
+      Travel: "from-sky-500/20 via-blue-500/20 to-cyan-500/20",
+      Food: "from-orange-500/20 via-amber-500/20 to-yellow-500/20",
+      Fashion: "from-fuchsia-500/20 via-purple-500/20 to-pink-500/20",
+      Sports: "from-red-500/20 via-orange-500/20 to-amber-500/20",
+      Art: "from-violet-500/20 via-purple-500/20 to-fuchsia-500/20",
+      default: "from-blue-500/20 via-purple-500/20 to-cyan-500/20"
+    };
+
+    return gradients[category] || gradients.default;
+  };
+
+  const getCategoryIcon = (category) => {
+    const icons = {
+      Technology: "💻",
+      Lifestyle: "🌟",
+      Travel: "✈️",
+      Food: "🍽️",
+      "Health & Wellness": "🧘‍♂️",
+      Business: "💼",
+      Entertainment: "🎬",
+      Education: "📚",
+      Science: "🔬",
+      "Arts & Culture": "🎨",
+
+      // Extra useful blog categories
+      Sports: "⚽",
+      Fashion: "👗",
+      Finance: "💰",
+      Gaming: "🎮",
+      News: "📰",
+
+      default: "📝",
+    };
+
+    return icons[category] || icons.default;
+  };
+
+
   return (
     <Card
       className={cn(
@@ -96,13 +142,13 @@ export function PostCard({ post, className, priority = false }) {
     >
       <Link href={`/blog/${safePost.slug}`} className="block h-full flex flex-col flex-1">
         <CardHeader className="p-0 flex-1">
-          {/* --- Featured Image --- */}
+          {/* --- Featured Image or Beautiful Fallback --- */}
           {safePost.featuredImage ? (
             <div className="relative h-36 sm:h-44 md:h-52 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
               <img
                 src={safePost.featuredImage}
                 alt={safePost.title}
-                className="h-full w-full object-cover transition-all duration-300"
+                className="h-full w-full object-cover transition-all duration-300 group-hover:scale-105"
                 loading={priority ? "eager" : "lazy"}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -127,9 +173,61 @@ export function PostCard({ post, className, priority = false }) {
               </div>
             </div>
           ) : (
-            <div className="h-36 sm:h-44 md:h-52 w-full bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-500/20 dark:to-purple-500/20 flex items-center justify-center transition-all duration-300">
-              <div className="text-3xl sm:text-4xl text-slate-300 dark:text-slate-600">
-                📝
+            /* --- Beautiful Fallback Design --- */
+            <div className={`relative h-36 sm:h-44 md:h-52 w-full bg-gradient-to-br ${getCategoryGradient(safePost.category)} overflow-hidden group-hover:scale-105 transition-all duration-500`}>
+
+              {/* Animated Background Pattern */}
+              <div className="absolute inset-0 opacity-30">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.15)_1px,transparent_0)] bg-[length:20px_20px] animate-pulse"></div>
+              </div>
+
+              {/* Main Content */}
+              <div className="relative z-10 h-full flex items-center justify-center p-4">
+                {/* Central Icon */}
+                <div className="text-4xl sm:text-5xl md:text-6xl transform group-hover:scale-110 transition-transform duration-300">
+                  {getCategoryIcon(safePost.category)}
+                </div>
+
+                {/* Rotated Category Text - Bottom Left to Top Right */}
+                {safePost.category && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="transform -rotate-45 translate-y-12 sm:translate-y-16">
+                      <div className="text-4xl sm:text-5xl md:text-6xl font-black text-white/10 dark:text-black/10 tracking-widest uppercase whitespace-nowrap">
+                        {safePost.category.repeat(2)}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Floating Elements */}
+                <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <Sparkles className="h-4 w-4 text-white/60 animate-bounce" />
+                </div>
+                <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-150">
+                  <BookOpen className="h-4 w-4 text-white/60 animate-bounce" />
+                </div>
+              </div>
+
+              {/* Shine Overlay Effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+
+              {/* Category Badge - Positioned differently for fallback */}
+              {safePost.category && (
+                <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
+                  <Badge
+                    variant="secondary"
+                    className="bg-white/90 dark:bg-slate-900/90 text-slate-700 dark:text-slate-300 backdrop-blur-sm text-xs font-medium px-2 py-0.5 sm:py-1 border-0 shadow-lg"
+                  >
+                    {safePost.category}
+                  </Badge>
+                </div>
+              )}
+
+              {/* Hover Arrow Indicator */}
+              <div className="absolute top-2 right-2 sm:top-3 sm:right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-full p-1 sm:p-1.5 shadow-lg">
+                  <ArrowUpRight className="h-3 w-3 sm:h-4 sm:w-4 text-slate-700 dark:text-slate-300" />
+                </div>
               </div>
             </div>
           )}
